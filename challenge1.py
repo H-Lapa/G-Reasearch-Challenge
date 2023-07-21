@@ -1,3 +1,4 @@
+# from 55% -> 63.89%, improving lets goo
 import math
 
 def sigmoid(x):
@@ -15,30 +16,53 @@ def auction_bids(game_info, current_info, last_auction_result, player_informatio
     # Compute how far we are into the auction, ranging from 0 to 1.
     auction_progress = 1 - (remaining_items / total_items)
 
-    # We apply a sigmoid function to the auction progress to compute a factor that increases smoothly from 0 to 1.
+    # Apply a sigmoid function to the auction progress to compute a factor that increases smoothly from 0 to 1.
     # This makes us bid more aggressively towards the end of the auction.
     aggression_factor = sigmoid((auction_progress - 0.55) * 10)
 
+    # If the last auction was won by someone else, increase the aggression factor.
+    if last_auction_result['winner'] != "player":
+        aggression_factor += 0.05
+
     # Compute our bid value taking into account the proportional bid value and our aggression factor.
-    # We multiply the aggression factor by a constant factor to make our bidding strategy more competitive.
     base_bid_value = remaining_budget * (prop_bid_value + 2 * aggression_factor)
 
     # Create a safety buffer to save a part of our budget for remaining items.
     buffer = remaining_budget * 0.1
 
-    # Update player_information with the average bid if it exists
+    # Consider the average bid in the current bid value
     if last_auction_result['total'] is not None:
         average_bid = last_auction_result['total'] / (game_info['Number_Robots'] + 1)
         if 'average_bids' not in player_information:
             player_information['average_bids'] = []
         player_information['average_bids'].append(average_bid)
     
-    # Consider the average bid in the current bid value
     if 'average_bids' in player_information and player_information['average_bids']:
         avg_bid = sum(player_information['average_bids']) / len(player_information['average_bids'])
         bid_value = min(base_bid_value + avg_bid, remaining_budget - buffer)
     else:
         bid_value = base_bid_value
+
+    # Keep track of total item value
+    if 'total_item_value' not in player_information:
+        player_information['total_item_value'] = 0
+    player_information['total_item_value'] += current_victory_points
+
+    # Adjust bid value based on how much we value the item
+    average_item_value = player_information['total_item_value'] / (total_items - remaining_items + 1)
+    value_ratio = current_victory_points / average_item_value
+    bid_value *= value_ratio
+
+    # Keep track of win streak (how many auctions we have won in a row)
+    if 'win_streak' not in player_information:
+        player_information['win_streak'] = 0
+    if last_auction_result['winner'] == "player":
+        player_information['win_streak'] += 1
+    else:
+        player_information['win_streak'] = 0
+
+    # If we have lost many auctions in a row, increase our bid slightly
+    bid_value += player_information['win_streak'] * 0.01 * remaining_budget
 
     # Ensure we do not bid over our budget.
     bid_value = min(bid_value, remaining_budget)
