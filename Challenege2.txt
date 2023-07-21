@@ -1,0 +1,63 @@
+Assigning tasks
+In this challenge, your goal is to schedule tasks to processors within certain time limits.
+
+Setting
+You are given a specification of a set of T tasks that need to be allocated to one of P processors. Each processor can only work on one task at a time and cannot be pre-empted (in other words, when the task is scheduled, it cannot be interrupted and tasks cannot be run concurrently on the same processor).
+
+Completing each task yields a reward, specified by a list reward for each task.
+
+Tasks have durations, specified by numbers in a list duration.
+
+Each task has an arrival time given in the list arrival, which is the earliest time it can be scheduled on any processor.
+
+For each task there is a time given in the time_bonus list within which assigning it it yields a bonus bonus.
+
+All of these numbers are positive integers.
+
+In addition, tasks have affinities towards being run on different processors, which act as scaling factors for the reward received for completing the task. The exact reward formula is given in the Scoring section.
+
+Implementation
+You need to implement only one function, assign_tasks. This function expects the following arguments:
+
+factor: a matrix of affinities (represented as a list with T elements, each a list of length P)
+arrival: a list of arrival times (of length T)
+bonus: a list of bonus reward amounts (of length T)
+reward: a list of rewards for completing tasks (of length T)
+duration: a list of durations of tasks (of length T)
+time_bonus: a list of times within which tasks should be scheduled in order to receive a bonus
+(of length T)
+The output of the function should be a schedule representing task assignments, represented as a list of length T whose items are pairs (p, t) representing the assigned processor and time when the task is scheduled. The numbers t should be positive integers.
+
+All arrays are 0-indexed and the processor IDs also start from 0 (they range over 0, 1, …, P-1).
+
+Scoring
+The reward received when task i is assigned to processor j at time t is given by the following formula:
+
+if t < arrival[i] + time_bonus[i], the reward received is factor[i][j] * (bonus[i] + reward[i] * duration[i] / (duration[i] + t - arrival[i]))
+otherwise, the reward is factor[i][j] * reward[i] * duration[i] / (duration[i] + t - arrival[i])
+Your solution will be evaluated based on the total reward your schedule achieves and the reward achieved by a reference solution. The reference solution receives slightly more than 80 points. You will receive 0 points on an example if your schedule violates the required constraints (for example, a processor handles two jobs at the same time).
+
+Your solution will be evaluated on four examples, satisfying the following constraints:
+
+test 1: P = 1, T = 200, max{arrival[i], duration[i], time_bonus[i]} <= 500
+test 2: P = 3, T = 200, max{arrival[i], duration[i], time_bonus[i]} <= 100
+test 3: P = 10, T = 200, max{arrival[i], duration[i], time_bonus[i]} <= 500, the matrix factor has all 1s (in other words, there are no special affinities)
+test 4: P = 10, T = 200, max{arrival[i], duration[i], time_bonus[i]} <= 500
+The first test is available to you, whereas the others are not.
+
+You can write your solution with the assumption that it satisfies all of the constraints and properties described in this problem statement.
+
+Example
+assign_tasks([[1]], [2], [3], [4], [5], [6]) is scheduling a single task to a single processor.
+
+The task has affinity of 1 towards that processor, arrives at time 2, has a bonus factor of 3, a reward of 4, a duration of 5, and a bonus time of 6.
+
+If the function returns [(0, 3)], it signifies that you are assigning task 0 (the first and only task) to processor 0, at time 3.
+
+You would score
+(1 * 4 * 5) / (5 + 3 - 2)
+which is 3.33.
+
+Since it was scheduled within the bonus time (3 < 2 + 6), it has the bonus factor applied to it,
+1 * (3 + (4 * 5) / (5 + 3 - 2))
+giving a final score of 6.33
