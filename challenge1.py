@@ -1,4 +1,4 @@
-# from 77.64% -> 78.18%
+# from 78.18% -> 79.52%
 import math
 
 def sigmoid(x):
@@ -18,7 +18,7 @@ def auction_bids(game_info, current_info, last_auction_result, player_informatio
 
     # Dynamic aggression threshold and amplifier based on auction progress and remaining items
     aggression_threshold = 0.55 - 0.05 * auction_progress
-    aggression_amplifier = 10 * remaining_items / total_items
+    aggression_amplifier = 9.255 * remaining_items / total_items
 
     # Apply a sigmoid function to the auction progress to compute a factor that increases smoothly from 0 to 1.
     aggression_factor = sigmoid((auction_progress - aggression_threshold) * aggression_amplifier)
