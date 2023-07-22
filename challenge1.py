@@ -1,4 +1,4 @@
-# from 72.29% -> 74.34%
+# from 74.34% -> 77.64%
 import math
 
 def sigmoid(x):
@@ -23,8 +23,16 @@ def auction_bids(game_info, current_info, last_auction_result, player_informatio
     # Apply a sigmoid function to the auction progress to compute a factor that increases smoothly from 0 to 1.
     aggression_factor = sigmoid((auction_progress - aggression_threshold) * aggression_amplifier)
 
-    # If the last auction was won by someone else, increase the aggression factor.
-    if last_auction_result['winner'] != "player" and last_auction_result['winning_bid'] is not None and last_auction_result['winning_bid'] > remaining_budget / remaining_items:
+    # Keep track of total item value
+    if 'total_item_value' not in player_information:
+        player_information['total_item_value'] = 0
+    player_information['total_item_value'] += current_victory_points
+
+    average_item_value = player_information['total_item_value'] / (total_items - remaining_items + 1)
+    value_ratio = current_victory_points / average_item_value
+
+    # If the last auction was won by someone else and the current item value is higher than average, increase the aggression factor.
+    if last_auction_result['winner'] != "player" and last_auction_result['winning_bid'] is not None and last_auction_result['winning_bid'] > remaining_budget / remaining_items and value_ratio > 1:
         aggression_factor += 0.05 * (1 + (last_auction_result['winning_bid'] - remaining_budget / remaining_items))
 
     # Compute our bid value taking into account the proportional bid value and our aggression factor.
@@ -46,20 +54,14 @@ def auction_bids(game_info, current_info, last_auction_result, player_informatio
     else:
         bid_value = base_bid_value
 
-    # Keep track of total item value
-    if 'total_item_value' not in player_information:
-        player_information['total_item_value'] = 0
-    player_information['total_item_value'] += current_victory_points
-
     # Adjust bid value based on how much we value the item
-    average_item_value = player_information['total_item_value'] / (total_items - remaining_items + 1)
-    value_ratio = current_victory_points / average_item_value
     bid_value *= value_ratio
 
     # Ensure we do not bid over our budget.
     bid_value = min(bid_value, remaining_budget)
 
     return bid_value
+
     
 ## getting data from the system
 
