@@ -1,4 +1,4 @@
-# from 74.34% -> 77.64%
+# from 77.64% -> 78.18%
 import math
 
 def sigmoid(x):
@@ -33,7 +33,7 @@ def auction_bids(game_info, current_info, last_auction_result, player_informatio
 
     # If the last auction was won by someone else and the current item value is higher than average, increase the aggression factor.
     if last_auction_result['winner'] != "player" and last_auction_result['winning_bid'] is not None and last_auction_result['winning_bid'] > remaining_budget / remaining_items and value_ratio > 1:
-        aggression_factor += 0.05 * (1 + (last_auction_result['winning_bid'] - remaining_budget / remaining_items))
+        aggression_factor += 0.045 * (1 + (last_auction_result['winning_bid'] - remaining_budget / remaining_items))
 
     # Compute our bid value taking into account the proportional bid value and our aggression factor.
     base_bid_value = remaining_budget * (prop_bid_value + 2 * aggression_factor)
